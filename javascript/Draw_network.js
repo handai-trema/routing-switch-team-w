@@ -126,7 +126,6 @@ var click = function() {
             if (checkEdgeInPath(pre_data[0].links[j], pre_data[0].paths[i], pre_data[0].hosts)){//エッジの色を赤に
               var arrow = checkToFrom(pre_data[0].links[j], pre_data[0].paths[i], pre_data[0].hosts);
               if (count == 2){arrow = {to:true, from:true};}
-console.log('two nodes:', count)
               edges.update([{id:pre_data[0].links[j].id, arrows:{to:{enabled:arrow.to}, from:{enabled:arrow.from}}, color:{color:newColor,highlight:newColor}}]);
             }else{
               edges.update([{id:pre_data[0].links[j].id, arrows:{to:{enabled:oldarrow.to}, from:{enabled:oldarrow.from}}, color:{color:oldColor,highlight:oldColor}}]);
