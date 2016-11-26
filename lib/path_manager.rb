@@ -4,7 +4,13 @@ require 'trema'
 
 # L2 routing path manager
 class PathManager < Trema::Controller
+
+  def add_observer(observer)
+    @observers << observer
+  end
+
   def start
+    @observers = []
     @graph = Graph.new
     logger.info 'Path Manager started.'
   end
@@ -35,7 +41,9 @@ class PathManager < Trema::Controller
 
   def delete_link(port_a, port_b, _topology)
     @graph.delete_link port_a, port_b
+    del_path = Path.find { |each| each.link?(port_a, port_b) }
     Path.find { |each| each.link?(port_a, port_b) }.each(&:destroy)
+    maybe_send_handler :del_path, del_path
   end
 
   def add_host(mac_address, port, _topology)
@@ -46,9 +54,17 @@ class PathManager < Trema::Controller
 
   # This method smells of :reek:FeatureEnvy but ignores them
   def maybe_create_shortest_path(packet_in)
+#    logger.info 'add path: '
     shortest_path =
       @graph.dijkstra(packet_in.source_mac, packet_in.destination_mac)
     return unless shortest_path
+    maybe_send_handler :add_path, shortest_path
     Path.create shortest_path, packet_in
+  end
+
+  def maybe_send_handler(method, *args)
+    @observers.each do |each|
+      each.__send__ method, *args if each.respond_to?(method)
+    end
   end
 end
