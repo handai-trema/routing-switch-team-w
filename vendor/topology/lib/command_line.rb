@@ -18,6 +18,7 @@ class CommandLine
     set_destination_mac_flag
     define_text_command
     define_graphviz_command
+    define_visJs_command
     run args
   end
 
@@ -33,7 +34,7 @@ class CommandLine
   end
 
   def define_text_command
-    default_command :text
+#    default_command :text
     desc 'Displays topology information (text mode)'
     command :text do |cmd|
       cmd.action(&method(:create_text_view))
@@ -45,6 +46,15 @@ class CommandLine
     arg_name 'output_file'
     command :graphviz do |cmd|
       cmd.action(&method(:create_graphviz_view))
+    end
+  end
+
+  def define_visJs_command
+    default_command :visJs
+    desc 'Displays topology information (visJs mode)'
+    arg_name 'output_file'
+    command :visJs do |cmd|
+      cmd.action(&method(:create_visJs_view))
     end
   end
 
@@ -60,6 +70,15 @@ class CommandLine
       @view = View::Graphviz.new
     else
       @view = View::Graphviz.new(args[0])
+    end
+  end
+
+  def create_visJs_view(_global_options, _options, args)
+    require 'view/visJs'
+    if args.empty?
+      @view = View::VisJs.new
+    else
+      @view = View::VisJs.new(args[0])
     end
   end
 end
