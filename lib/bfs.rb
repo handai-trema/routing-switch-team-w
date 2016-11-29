@@ -6,12 +6,14 @@ class BandFirstSearch #20161129 change by ginnan
     attr_reader :neighbors
     attr_accessor :distance
     attr_reader :prev
+    attr_accessor :visited
 
     def initialize(name, neighbors)
       @name = name
       @neighbors = neighbors
       @distance = 100_000
       @prev = nil
+      @visited = false
     end
 
     def maybe_update_distance_and_prev(min_node)
@@ -49,26 +51,23 @@ class BandFirstSearch #20161129 change by ginnan
 
   def run(start, goal)
     find(start, @all).distance = 0
-    tmp = @unvisited.shift
+    dst = find(goal, @all)
+    tmp = find(start, @all)
     reserved = []
-    while !(@unvisited.empty?) do
-      puts "1"
+    while tmp != dst do
+      tmp.visited = true
       maybe_update_neighbors_of(tmp)
-      while !(tmp.neighbors.empty?) do
-        a = tmp.neighbors.shift
-        if @unvisited.find(a)
-          reserved << a
-        end
+      for i in 0..(tmp.neighbors.length - 1) do
+        a = find(tmp.neighbors[i], @all)
+        reserved << a
       end
-      b = reserved.shift
-      flag = false
+      tmp = reserved.shift
+      while tmp.visited do
+        tmp = reserved.shift
+      end
       for i in 0..(@unvisited.length - 1) do
-        if @unvisited[i].neighbors.include?(b)
-          tmp = @unvisited[i]
+        if @unvisited.include?(tmp)
           @unvisited.delete_at(i)
-          flag = true
-          puts "2"
-          break
         end
       end
     end
